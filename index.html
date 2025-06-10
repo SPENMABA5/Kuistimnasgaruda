@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Timnas Garuda Indonesia</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Menggunakan font Inter untuk tampilan yang lebih modern */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Latar belakang gradien yang menarik */
+            background: linear-gradient(to bottom right, #EF4444, #DC2626); /* Merah khas Indonesia */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.95); /* Sedikit transparan untuk efek modern */
+            border-radius: 16px; /* Sudut membulat */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* Bayangan yang elegan */
+            width: 100%;
+            max-width: 600px;
+            padding: 32px;
+            text-align: center;
+            color: #333;
+            animation: fadeIn 0.8s ease-out; /* Animasi fade-in */
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h1 {
+            color: #DC2626; /* Merah Indonesia */
+            margin-bottom: 24px;
+        }
+        .input-field {
+            width: calc(100% - 20px); /* Mengurangi padding */
+            padding: 12px;
+            margin-bottom: 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px; /* Sudut membulat */
+            font-size: 16px;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            border-color: #EF4444; /* Fokus menjadi merah */
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+            outline: none;
+        }
+        .button {
+            background-color: #22C55E; /* Hijau yang cerah */
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px; /* Sudut membulat */
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            display: inline-block;
+            margin-top: 16px;
+        }
+        .button:hover {
+            background-color: #16A34A; /* Hijau yang lebih gelap saat hover */
+            transform: translateY(-2px); /* Efek sedikit naik */
+        }
+        .button:active {
+            transform: translateY(0); /* Kembali saat diklik */
+        }
+        .option-button {
+            background-color: #F3F4F6; /* Abu-abu terang */
+            color: #333;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .option-button:hover {
+            background-color: #E5E7EB; /* Abu-abu lebih gelap saat hover */
+            border-color: #D1D5DB;
+        }
+        .option-button.selected {
+            background-color: #BFDBFE; /* Biru terang saat dipilih */
+            border-color: #60A5FA;
+            font-weight: 600;
+        }
+        .option-button.correct {
+            background-color: #86EFAC; /* Hijau saat benar */
+            border-color: #22C55E;
+            color: white;
+            font-weight: 600;
+        }
+        .option-button.incorrect {
+            background-color: #FCA5A5; /* Merah saat salah */
+            border-color: #EF4444;
+            color: white;
+            font-weight: 600;
+        }
+        /* Menghilangkan border dan box-shadow dari fieldset dan legend */
+        fieldset {
+            border: none;
+            padding: 0;
+            margin: 0;
+        }
+        legend {
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Bagian Informasi Pengguna -->
+        <div id="user-info-section">
+            <h1 class="text-4xl font-bold mb-6">Selamat Datang di Kuis Timnas Garuda!</h1>
+            <p class="text-lg mb-6">Isi data di bawah ini untuk memulai kuis.</p>
+            <input type="text" id="userName" class="input-field" placeholder="Nama Anda" required>
+            <input type="text" id="favPlayer" class="input-field" placeholder="Pemain Favorit Timnas Garuda" required>
+            <input type="text" id="userHobby" class="input-field" placeholder="Hobi Anda" required>
+            <button id="startButton" class="button">Mulai Kuis</button>
+        </div>
+
+        <!-- Bagian Kuis -->
+        <div id="quiz-section" class="hidden">
+            <h1 class="text-3xl font-bold mb-8">Kuis Timnas Garuda</h1>
+            <div id="question-container" class="text-left">
+                <p id="question-number" class="text-xl font-semibold mb-4"></p>
+                <p id="question-text" class="text-2xl font-bold mb-6"></p>
+                <div id="options-container" class="grid gap-4">
+                    <!-- Opsi jawaban akan dimuat di sini oleh JavaScript -->
+                </div>
+            </div>
+            <button id="nextButton" class="button hidden mt-8">Selanjutnya</button>
+            <div id="message-box" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md hidden"></div>
+        </div>
+
+        <!-- Bagian Hasil -->
+        <div id="result-section" class="hidden">
+            <h1 class="text-4xl font-bold mb-6">Hasil Kuis Anda</h1>
+            <p id="final-score" class="text-3xl font-semibold mb-4"></p>
+            <p id="user-info-summary" class="text-lg mb-8"></p>
+            <p class="text-3xl font-bold text-red-600 animate-pulse">Jangan Lupa Dukung Timnas Indonesia!</p>
+            <button id="restartButton" class="button mt-8">Ulangi Kuis</button>
+        </div>
+    </div>
+
+    <script>
+        // Mendapatkan elemen-elemen DOM
+        const userInfoSection = document.getElementById('user-info-section');
+        const quizSection = document.getElementById('quiz-section');
+        const resultSection = document.getElementById('result-section');
+        const startButton = document.getElementById('startButton');
+        const nextButton = document.getElementById('nextButton');
+        const restartButton = document.getElementById('restartButton');
+        const userNameInput = document.getElementById('userName');
+        const favPlayerInput = document.getElementById('favPlayer');
+        const userHobbyInput = document.getElementById('userHobby');
+        const questionNumberElement = document.getElementById('question-number');
+        const questionTextElement = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const finalScoreElement = document.getElementById('final-score');
+        const userInfoSummaryElement = document.getElementById('user-info-summary');
+        const messageBox = document.getElementById('message-box');
+
+        // Variabel untuk menyimpan data kuis dan status
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userName = '';
+        let favPlayer = '';
+        let userHobby = '';
+        let selectedOption = null;
+
+        // Daftar pertanyaan kuis
+        const quizQuestions = [
+            {
+                question: "Siapakah pelatih kepala Timnas Indonesia saat ini?",
+                options: ["Luis Milla", "Shin Tae-yong", "Alfred Riedl", "Simon McMenemy"],
+                answer: "Shin Tae-yong"
+            },
+            {
+                question: "Berapa kali Indonesia meraih gelar juara Piala AFF (sebelumnya Tiger Cup)?",
+                options: ["0", "1", "2", "3"],
+                answer: "0"
+            },
+            {
+                question: "Di stadion manakah Timnas Indonesia sering bermain pertandingan kandang?",
+                options: ["Stadion Manahan", "Stadion Pakansari", "Stadion Gelora Bung Karno", "Stadion Si Jalak Harupat"],
+                answer: "Stadion Gelora Bung Karno"
+            },
+            {
+                question: "Siapakah pencetak gol terbanyak Timnas Indonesia sepanjang masa?",
+                options: ["Boaz Solossa", "Kurniawan Dwi Yulianto", "Cristian Gonzáles", "Bambang Pamungkas"],
+                answer: "Bambang Pamungkas"
+            },
+            {
+                question: "Kapan PSSI (Persatuan Sepak Bola Seluruh Indonesia) didirikan?",
+                options: ["1945", "1930", "1950", "1960"],
+                answer: "1930"
+            },
+            {
+                question: "Timnas Indonesia dijuluki sebagai?",
+                options: ["Merah Putih", "Macan Asia", "Garuda", "Rajawali"],
+                answer: "Garuda"
+            },
+            {
+                question: "Pemain muda Indonesia yang saat ini bermain di klub Eropa dan sering dipanggil Timnas adalah...?",
+                options: ["Egy Maulana Vikri", "Witan Sulaeman", "Asnawi Mangkualam", "Pratama Arhan"],
+                answer: "Pratama Arhan"
+            },
+            {
+                question: "Pada tahun berapa Indonesia pertama kali lolos ke Piala Dunia?",
+                options: ["1950", "1938", "1962", "1974"],
+                answer: "1938"
+            },
+            {
+                question: "Siapakah kapten Timnas Indonesia saat ini (paling sering)?",
+                options: ["Evan Dimas", "Stefano Lilipaly", "Fachruddin Aryanto", "Asnawi Mangkualam"],
+                answer: "Asnawi Mangkualam"
+            },
+            {
+                question: "Di ajang apa Timnas Indonesia pernah meraih medali emas SEA Games?",
+                options: ["Bulu Tangkis", "Sepak Bola", "Voli", "Renang"],
+                answer: "Sepak Bola"
+            }
+        ];
+
+        // Fungsi untuk menampilkan pesan (pengganti alert)
+        function showMessage(message, type = 'error') {
+            messageBox.textContent = message;
+            messageBox.className = `mt-4 p-3 border rounded-md ${type === 'error' ? 'bg-red-100 border-red-400 text-red-700' : 'bg-green-100 border-green-400 text-green-700'} `;
+            messageBox.classList.remove('hidden');
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, 3000); // Pesan akan hilang setelah 3 detik
+        }
+
+        // Fungsi untuk memulai kuis
+        startButton.addEventListener('click', () => {
+            userName = userNameInput.value.trim();
+            favPlayer = favPlayerInput.value.trim();
+            userHobby = userHobbyInput.value.trim();
+
+            if (userName === '' || favPlayer === '' || userHobby === '') {
+                showMessage("Mohon lengkapi semua kolom informasi sebelum memulai kuis.");
+                return;
+            }
+
+            // Sembunyikan bagian info pengguna dan tampilkan bagian kuis
+            userInfoSection.classList.add('hidden');
+            quizSection.classList.remove('hidden');
+
+            currentQuestionIndex = 0;
+            score = 0;
+            loadQuestion();
+        });
+
+        // Fungsi untuk memuat pertanyaan
+        function loadQuestion() {
+            selectedOption = null; // Reset pilihan
+            nextButton.classList.add('hidden'); // Sembunyikan tombol selanjutnya
+
+            // Dapatkan pertanyaan saat ini
+            const questionData = quizQuestions[currentQuestionIndex];
+            questionNumberElement.textContent = `Pertanyaan ${currentQuestionIndex + 1} dari ${quizQuestions.length}`;
+            questionTextElement.textContent = questionData.question;
+            optionsContainer.innerHTML = ''; // Bersihkan opsi sebelumnya
+
+            // Buat tombol untuk setiap opsi jawaban
+            questionData.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option-button');
+                button.addEventListener('click', () => selectOption(button, option, questionData.answer));
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        // Fungsi untuk memilih opsi jawaban
+        function selectOption(button, option, correctAnswer) {
+            // Nonaktifkan semua tombol opsi setelah dipilih
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.disabled = true;
+                if (btn === button) {
+                    btn.classList.add('selected'); // Menandai opsi yang dipilih
+                }
+                // Menandai jawaban yang benar setelah opsi dipilih
+                if (btn.textContent === correctAnswer) {
+                    btn.classList.add('correct');
+                } else if (btn === button) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            selectedOption = option; // Simpan pilihan yang dipilih
+            nextButton.classList.remove('hidden'); // Tampilkan tombol selanjutnya
+
+            // Periksa jawaban dan update skor
+            if (option === correctAnswer) {
+                score++;
+            }
+        }
+
+        // Fungsi untuk pindah ke pertanyaan berikutnya atau menampilkan hasil
+        nextButton.addEventListener('click', () => {
+            if (selectedOption === null) {
+                showMessage("Mohon pilih salah satu jawaban sebelum melanjutkan.");
+                return;
+            }
+
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizQuestions.length) {
+                loadQuestion();
+            } else {
+                showResults(); // Jika semua pertanyaan sudah dijawab, tampilkan hasil
+            }
+        });
+
+        // Fungsi untuk menampilkan hasil kuis
+        function showResults() {
+            quizSection.classList.add('hidden');
+            resultSection.classList.remove('hidden');
+
+            finalScoreElement.textContent = `Skor Anda: ${score} dari ${quizQuestions.length}`;
+            userInfoSummaryElement.innerHTML = `Terima kasih, <strong>${userName}</strong>! <br>Pemain favorit Anda: <strong>${favPlayer}</strong>, Hobi Anda: <strong>${userHobby}</strong>.`;
+        }
+
+        // Fungsi untuk mengulangi kuis
+        restartButton.addEventListener('click', () => {
+            resultSection.classList.add('hidden');
+            userInfoSection.classList.remove('hidden'); // Kembali ke halaman info pengguna
+            // Reset semua variabel
+            currentQuestionIndex = 0;
+            score = 0;
+            userNameInput.value = '';
+            favPlayerInput.value = '';
+            userHobbyInput.value = '';
+            selectedOption = null;
+        });
+    </script>
+</body>
+</html>
